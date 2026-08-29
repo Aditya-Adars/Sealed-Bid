@@ -33,20 +33,29 @@ export async function deployPreprodContract(
     zkConfigBaseUrl: zkUrl
   });
 
-  const baseZkConfigProvider = new FetchZkConfigProvider(zkUrl, window.fetch.bind(window));
-  
-  const zkConfigProvider = {
-    getVerifierKey: (circuitId: string) => baseZkConfigProvider.getVerifierKey(circuitId.split('#').pop() as string),
-    getProverKey: (circuitId: string) => baseZkConfigProvider.getProverKey(circuitId.split('#').pop() as string),
-    getZKIR: (circuitId: string) => baseZkConfigProvider.getZKIR(circuitId.split('#').pop() as string),
-    getVerifierKeys: async (circuitIds: string[]) => Promise.all(circuitIds.map(async id => [id, await baseZkConfigProvider.getVerifierKey(id.split('#').pop() as string)] as [string, any])),
-    getProverKeys: async (circuitIds: string[]) => Promise.all(circuitIds.map(async id => [id, await baseZkConfigProvider.getProverKey(id.split('#').pop() as string)] as [string, any])),
-    getZKIRs: async (circuitIds: string[]) => Promise.all(circuitIds.map(async id => [id, await baseZkConfigProvider.getZKIR(id.split('#').pop() as string)] as [string, any]))
-  } as any;
-  
-  console.log("zkConfigProvider:", zkConfigProvider);
-  console.log("has getZKIR?", typeof zkConfigProvider.getZKIR === 'function');
-  console.log("has getVerifierKeys?", typeof (zkConfigProvider as any).getVerifierKeys === 'function');
+  class BrowserZkConfigProvider extends FetchZkConfigProvider<string> {
+    private normalizeCircuitId(circuitId: string) {
+      return circuitId.split("#").pop() as string;
+    }
+
+    override getVerifierKey(circuitId: string) {
+      return super.getVerifierKey(this.normalizeCircuitId(circuitId));
+    }
+
+    override getProverKey(circuitId: string) {
+      return super.getProverKey(this.normalizeCircuitId(circuitId));
+    }
+
+    override getZKIR(circuitId: string) {
+      return super.getZKIR(this.normalizeCircuitId(circuitId));
+    }
+
+    override getVerifierKeys(circuitIds: string[]) {
+      return Promise.all(circuitIds.map(async id => [id, await this.getVerifierKey(id)] as [string, any]));
+    }
+  }
+
+  const zkConfigProvider = new BrowserZkConfigProvider(zkUrl, window.fetch.bind(window));
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
