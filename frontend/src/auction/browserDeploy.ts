@@ -3,8 +3,6 @@ import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import { CompiledContract } from "@midnight-ntwrk/compact-js";
 import { sampleSigningKey } from "@midnight-ntwrk/compact-runtime";
 import { createUnprovenDeployTx, submitTxAsync } from "@midnight-ntwrk/midnight-js-contracts";
-import { ZKConfigProvider, createZKIR, createProverKey, createVerifierKey } from "@midnight-ntwrk/midnight-js-types";
-
 import { Contract } from "../generated/sealed-bid-auction/contract/index.js";
 
 const DEFAULT_CONTRACT_NAME = "SealedBidAuction";
@@ -36,31 +34,29 @@ export async function deployPreprodContract(
 
 
 
-  class MyZkConfigProvider extends ZKConfigProvider<string> {
-    constructor(private baseUrl: string) {
-      super();
-    }
-    
-    async getZKIR(circuitId: string) {
-      const name = circuitId.split('#').pop();
-      const response = await fetch(`${this.baseUrl}zkir/${name}.zkir`);
-      return createZKIR(new Uint8Array(await response.arrayBuffer()));
+  class BrowserZkConfigProvider extends FetchZkConfigProvider<string> {
+    private normalizeCircuitId(circuitId: string) {
+      return circuitId.split("#").pop() as string;
     }
 
-    async getProverKey(circuitId: string) {
-      const name = circuitId.split('#').pop();
-      const response = await fetch(`${this.baseUrl}keys/${name}.prover`);
-      return createProverKey(new Uint8Array(await response.arrayBuffer()));
+    override getVerifierKey(circuitId: string) {
+      return super.getVerifierKey(this.normalizeCircuitId(circuitId));
     }
 
-    async getVerifierKey(circuitId: string) {
-      const name = circuitId.split('#').pop();
-      const response = await fetch(`${this.baseUrl}keys/${name}.verifier`);
-      return createVerifierKey(new Uint8Array(await response.arrayBuffer()));
+    override getProverKey(circuitId: string) {
+      return super.getProverKey(this.normalizeCircuitId(circuitId));
+    }
+
+    override getZKIR(circuitId: string) {
+      return super.getZKIR(this.normalizeCircuitId(circuitId));
+    }
+
+    override getVerifierKeys(circuitIds: string[]) {
+      return Promise.all(circuitIds.map(async id => [id, await this.getVerifierKey(id)] as [string, any]));
     }
   }
 
-  const zkConfigProvider = new MyZkConfigProvider(zkUrl);
+  const zkConfigProvider = new BrowserZkConfigProvider(zkUrl, window.fetch.bind(window));
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
