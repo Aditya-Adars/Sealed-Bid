@@ -13,6 +13,7 @@ This dApp is designed around Midnight's selective disclosure model: bidders keep
 
 Use this section to keep the submission evidence in one place:
 
+- **Deployed Preprod Contract ID**: `86acae374f30f3091570fabcbca34031d6154810c50d4f7c12483d1f1cf80740`
 - Live demo: [https://sealed-bid-auction-mu.vercel.app](https://sealed-bid-auction-mu.vercel.app)
 - Test output screenshot: 
   ![Test Output Screenshot](./test-output.png)
@@ -134,7 +135,7 @@ Connect 1AM, approve the browser wallet prompt, and the page will show the deplo
 If you are previewing a deployed contract from a static page, you can still add a `frontend/.env` file with:
 
 ```bash
-VITE_PREPROD_CONTRACT_ID=0xYOUR_PREPROD_CONTRACT_ID_HERE
+VITE_PREPROD_CONTRACT_ID=86acae374f30f3091570fabcbca34031d6154810c50d4f7c12483d1f1cf80740
 ```
 
 The app will show that value in the hero section as the preprod contract ID.
@@ -163,6 +164,7 @@ The GitHub Actions workflow runs on push and pull request:
 
 ## Deploy
 
+- **Contract ID (Midnight Preprod)**: `86acae374f30f3091570fabcbca34031d6154810c50d4f7c12483d1f1cf80740`
 - Browser deploy route: `/deploy`
 - Wallet: `1AM`
 - Network: `preprod`
