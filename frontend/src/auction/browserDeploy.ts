@@ -7,6 +7,7 @@ import { FetchZkConfigProvider } from "@midnight-ntwrk/midnight-js-fetch-zk-conf
 import { Contract } from "../generated/sealed-bid-auction/contract/index.js";
 
 const DEFAULT_CONTRACT_NAME = "SealedBidAuction";
+const ZK_ASSET_PATH = "/zk/sealed-bid-auction/";
 
 export type BrowserDeployResult = {
   contractAddress: string;
@@ -25,37 +26,12 @@ export async function deployPreprodContract(
   itemDescription = "Sealed-bid item"
 ): Promise<BrowserDeployResult> {
   setNetworkId("preprod");
-  const ZK_ASSET_PATH = "/zk/sealed-bid-auction/";
   const zkUrl = new URL(ZK_ASSET_PATH, window.location.origin).toString();
-
   const providers = await buildOneAMProviders(adapter, {
     contractName,
     zkConfigBaseUrl: zkUrl
   });
-
-  class BrowserZkConfigProvider extends FetchZkConfigProvider<string> {
-    private normalizeCircuitId(circuitId: string) {
-      return circuitId.split("#").pop() as string;
-    }
-
-    override getVerifierKey(circuitId: string) {
-      return super.getVerifierKey(this.normalizeCircuitId(circuitId));
-    }
-
-    override getProverKey(circuitId: string) {
-      return super.getProverKey(this.normalizeCircuitId(circuitId));
-    }
-
-    override getZKIR(circuitId: string) {
-      return super.getZKIR(this.normalizeCircuitId(circuitId));
-    }
-
-    override getVerifierKeys(circuitIds: string[]) {
-      return Promise.all(circuitIds.map(async id => [id, await this.getVerifierKey(id)] as [string, any]));
-    }
-  }
-
-  const zkConfigProvider = new BrowserZkConfigProvider(zkUrl, window.fetch.bind(window));
+  const zkConfigProvider = new FetchZkConfigProvider(zkUrl, window.fetch.bind(window));
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
@@ -69,7 +45,7 @@ export async function deployPreprodContract(
   const witnesses = {
     localSecretKey: (ctx: any) => [ctx.privateState, initialPrivateState.secretKey],
     localBidAmount: (ctx: any) => [ctx.privateState, initialPrivateState.bidAmount],
-    localBidSalt: (ctx: any) => [ctx.privateState, initialPrivateState.bidSalt],
+    localBidSalt: (ctx: any) => [ctx.privateState, initialPrivateState.bidSalt]
   };
 
   const compiledContract = CompiledContract.make(contractName, Contract).pipe(
@@ -100,4 +76,3 @@ export async function deployPreprodContract(
 
   return { contractAddress };
 }
-// Utilities for deploying the sealed-bid auction contract via 1AM wallet
