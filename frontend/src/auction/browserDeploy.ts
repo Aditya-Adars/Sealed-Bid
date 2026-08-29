@@ -24,7 +24,7 @@ class CustomZkConfigProvider extends ZKConfigProvider<string> {
 
   async getZKIR(circuitId: string) {
     const name = this.cleanId(circuitId);
-    const res = await fetch(`${this.baseUrl}zkir/${name}.zkir`);
+    const res = await fetch(`${this.baseUrl}zkir/${name}.bzkir`);
     if (!res.ok) throw new Error(`Failed to fetch ZKIR for ${name}: ${res.statusText}`);
     return createZKIR(new Uint8Array(await res.arrayBuffer()));
   }
