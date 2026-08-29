@@ -11,19 +11,19 @@ export type BrowserDeployResult = {
   contractAddress: string;
 };
 
-export async function connectPreview1AM(): Promise<OneAMWalletAdapter> {
-  setNetworkId("preview");
-  const adapter = new OneAMWalletAdapter({ network: "preview" });
+export async function connectPreprod1AM(): Promise<OneAMWalletAdapter> {
+  setNetworkId("preprod");
+  const adapter = new OneAMWalletAdapter({ network: "preprod" });
   await adapter.connect();
   return adapter;
 }
 
-export async function deployPreviewContract(
+export async function deployPreprodContract(
   adapter: OneAMWalletAdapter,
   contractName = DEFAULT_CONTRACT_NAME,
   itemDescription = "Sealed-bid item"
 ): Promise<BrowserDeployResult> {
-  setNetworkId("preview");
+  setNetworkId("preprod");
   const ZK_ASSET_PATH = "/zk/sealed-bid-auction/";
 
   const providers = await buildOneAMProviders(adapter, {

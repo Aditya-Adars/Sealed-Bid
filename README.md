@@ -128,16 +128,16 @@ npm run dev
 
 Then open the local Vite URL.
 
-To deploy from the browser extension on Midnight preview, open `http://localhost:5173/deploy`.
+To deploy from the browser extension on Midnight preprod, open `http://localhost:5173/deploy`.
 Connect 1AM, approve the browser wallet prompt, and the page will show the deployed contract address.
 
 If you are previewing a deployed contract from a static page, you can still add a `frontend/.env` file with:
 
 ```bash
-VITE_PREVIEW_CONTRACT_ID=0xYOUR_PREVIEW_CONTRACT_ID_HERE
+VITE_PREPROD_CONTRACT_ID=0xYOUR_PREPROD_CONTRACT_ID_HERE
 ```
 
-The app will show that value in the hero section as the preview contract ID.
+The app will show that value in the hero section as the preprod contract ID.
 
 ## Tests
 
@@ -165,7 +165,7 @@ The GitHub Actions workflow runs on push and pull request:
 
 - Browser deploy route: `/deploy`
 - Wallet: `1AM`
-- Network: `preview`
+- Network: `preprod`
 - Main flow: browser extension only
 
 ## Submission Checklist

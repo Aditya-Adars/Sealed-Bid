@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { LocalAuctionClient } from "./auction/localClient";
-import { connectPreview1AM, deployPreviewContract, type BrowserDeployResult } from "./auction/browserDeploy";
+import { connectPreprod1AM, deployPreprodContract, type BrowserDeployResult } from "./auction/browserDeploy";
 import { AuctionClient, AuctionPublicState, Phase, phaseLabel } from "./auction/types";
 import { connect1AM, submitWalletAction, type MidnightWalletLike, type WalletManagerLike } from "./auction/walletBridge";
 
 const AUCTIONEER = "auctioneer";
 const HISTORY_STORAGE_KEY = "midnight-auction-history";
-const PREVIEW_CONTRACT_ID = import.meta.env.VITE_PREVIEW_CONTRACT_ID ?? "";
+const PREPROD_CONTRACT_ID = import.meta.env.VITE_PREPROD_CONTRACT_ID ?? "";
 const formatShort = (hex: string) => (hex ? `${hex.slice(0, 10)}...` : "-");
 
 type HistoryEntry = {
@@ -25,24 +25,24 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function DeployPage() {
-  const [status, setStatus] = useState("Connect 1AM on preview to deploy.");
+  const [status, setStatus] = useState("Connect 1AM on preprod to deploy.");
   const [error, setError] = useState("");
   const [walletStatus, setWalletStatus] = useState("Disconnected");
-  const [walletDetail, setWalletDetail] = useState("No preview wallet connected");
+  const [walletDetail, setWalletDetail] = useState("No preprod wallet connected");
   const [contractName, setContractName] = useState("SealedBidAuction");
   const [deployed, setDeployed] = useState<BrowserDeployResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const [adapter, setAdapter] = useState<Awaited<ReturnType<typeof connectPreview1AM>> | null>(null);
+  const [adapter, setAdapter] = useState<Awaited<ReturnType<typeof connectPreprod1AM>> | null>(null);
 
   const connectWallet = async () => {
     setError("");
     setBusy(true);
     try {
-      const active = await connectPreview1AM();
+      const active = await connectPreprod1AM();
       setAdapter(active);
       setWalletStatus("1AM connected");
-      setWalletDetail("Preview network ready");
-      setStatus("Connected to 1AM on preview.");
+      setWalletDetail("Preprod network ready");
+      setStatus("Connected to 1AM on preprod.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
       setWalletStatus("Connection failed");
@@ -60,9 +60,9 @@ function DeployPage() {
     setError("");
     setBusy(true);
     try {
-      const result = await deployPreviewContract(adapter, contractName.trim() || "SealedBidAuction");
+      const result = await deployPreprodContract(adapter, contractName.trim() || "SealedBidAuction");
       setDeployed(result);
-      setStatus("Contract deployed through 1AM preview.");
+      setStatus("Contract deployed through 1AM preprod.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -74,15 +74,15 @@ function DeployPage() {
     <main className="shell">
       <section className="hero card">
         <div>
-          <p className="eyebrow">Preview deploy</p>
+          <p className="eyebrow">Preprod deploy</p>
           <h1>Deploy from the browser.</h1>
           <p className="lede">
-            Connect 1AM on Midnight preview, deploy directly from the wallet extension, and show the
+            Connect 1AM on Midnight preprod, deploy directly from the wallet extension, and show the
             deployed contract address immediately.
           </p>
         </div>
         <div className="hero-grid">
-          <Stat label="Network" value="preview" />
+          <Stat label="Network" value="preprod" />
           <Stat label="Wallet" value={walletStatus} />
           <Stat label="Status" value={status} />
           <Stat label="Contract" value={deployed ? formatShort(deployed.contractAddress) : "not deployed"} />
@@ -102,7 +102,7 @@ function DeployPage() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">1AM</p>
-            <h2>Connect preview wallet</h2>
+            <h2>Connect preprod wallet</h2>
           </div>
         </div>
 
@@ -245,7 +245,7 @@ function AuctionPage({
         const kit = await import("midnight-wallet-kit");
         if (!mounted) return;
         const manager = kit.createMidnightWalletManager({
-          network: "preview",
+          network: "preprod",
           only: ["1AM"]
         }) as unknown as WalletManagerLike;
         setWalletManager(manager);
@@ -341,8 +341,8 @@ function AuctionPage({
           <Stat label="Highest revealed bid" value={state.hasWinner ? String(state.highestBid) : "none"} />
           <Stat label="Wallet" value={walletStatus} />
           <Stat
-            label="Preview contract ID"
-            value={PREVIEW_CONTRACT_ID ? formatShort(PREVIEW_CONTRACT_ID) : "not set"}
+            label="Preprod contract ID"
+            value={PREPROD_CONTRACT_ID ? formatShort(PREPROD_CONTRACT_ID) : "not set"}
           />
         </div>
         <div className="winner">
