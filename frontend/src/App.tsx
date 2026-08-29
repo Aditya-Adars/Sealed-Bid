@@ -8,7 +8,6 @@ const AUCTIONEER = "auctioneer";
 const HISTORY_STORAGE_KEY = "midnight-auction-history";
 const PREPROD_CONTRACT_ID = import.meta.env.VITE_PREPROD_CONTRACT_ID ?? "";
 const formatShort = (hex: string) => (hex ? `${hex.slice(0, 10)}...` : "-");
-const formatAddress = (address?: string) => (address ? `${address.slice(0, 10)}...` : "-");
 
 type HistoryEntry = {
   id: string;
@@ -43,8 +42,8 @@ function DeployPage() {
       const active = await connectPreprod1AM();
       setAdapter(active);
       setWalletStatus("1AM connected");
-      setWalletAddress(active.address ?? "");
-      setWalletDetail(active.address ? `Preprod network ready: ${active.address}` : "Preprod network ready");
+      setWalletAddress("");
+      setWalletDetail("Preprod network ready");
       setStatus("Connected to 1AM on preprod.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
