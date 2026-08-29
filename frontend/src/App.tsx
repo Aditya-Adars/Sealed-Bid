@@ -122,10 +122,7 @@ function DeployPage() {
           </button>
         </div>
 
-        <p className="muted">
-          This path uses the browser wallet extension and 1AM&apos;s provider flow. No server-side
-          deployer wallet or local proof server is required in the main flow.
-        </p>
+
       </section>
 
       <section className="card">

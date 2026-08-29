@@ -1,6 +1,8 @@
-import { OneAMWalletAdapter, buildOneAMProviders, deployContract } from "midnight-wallet-kit";
+import { OneAMWalletAdapter, buildOneAMProviders } from "midnight-wallet-kit";
 import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import { CompiledContract } from "@midnight-ntwrk/compact-js";
+import { sampleSigningKey } from "@midnight-ntwrk/compact-runtime";
+import { createUnprovenDeployTx, submitTxAsync } from "@midnight-ntwrk/midnight-js-contracts";
 import { Contract } from "../generated/sealed-bid-auction/contract/index.js";
 
 const DEFAULT_CONTRACT_NAME = "SealedBidAuction";
@@ -37,25 +39,38 @@ export async function deployPreviewContract(
   };
 
   // The SealedBidAuction contract constructor calls localSecretKey to derive
-  // the auctioneer identity, so we must provide real witness functions
-  // (withVacantWitnesses won't work here).
+  // the auctioneer identity, so we must provide real witness functions.
   const witnesses = {
     localSecretKey: (ctx: any) => [ctx.privateState, initialPrivateState.secretKey],
     localBidAmount: (ctx: any) => [ctx.privateState, initialPrivateState.bidAmount],
     localBidSalt: (ctx: any) => [ctx.privateState, initialPrivateState.bidSalt],
   };
 
-  const compiledContract = (CompiledContract.make(contractName, Contract) as any).pipe(
-    (cc: any) => (CompiledContract as any).withWitnesses(witnesses)(cc),
-    (CompiledContract as any).withCompiledFileAssets(ZK_ASSET_PATH)
+  const compiledContract = CompiledContract.make(contractName, Contract).pipe(
+    CompiledContract.withWitnesses(witnesses),
+    CompiledContract.withCompiledFileAssets(ZK_ASSET_PATH)
   );
 
-  const deployed = await deployContract(providers, {
-    compiledContract,
-    args: [itemDescription],
-    privateStateId: `${DEFAULT_CONTRACT_NAME}PrivateState`,
-    initialPrivateState
-  } as any);
+  const privateStateId = `${DEFAULT_CONTRACT_NAME}PrivateState`;
 
-  return { contractAddress: deployed.contractAddress };
+  const deployTxData = await (createUnprovenDeployTx as any)(
+    { zkConfigProvider: providers.zkConfigProvider, walletProvider: providers.walletProvider },
+    {
+      compiledContract,
+      args: [itemDescription],
+      privateStateId,
+      initialPrivateState,
+      signingKey: sampleSigningKey()
+    }
+  );
+
+  const contractAddress = deployTxData.public.contractAddress;
+
+  await (submitTxAsync as any)(providers, { unprovenTx: deployTxData.private.unprovenTx });
+
+  await (providers as any).privateStateProvider.setContractAddress(contractAddress);
+  await (providers as any).privateStateProvider.set(privateStateId, deployTxData.private.initialPrivateState);
+  await (providers as any).privateStateProvider.setSigningKey(contractAddress, deployTxData.private.signingKey);
+
+  return { contractAddress };
 }
