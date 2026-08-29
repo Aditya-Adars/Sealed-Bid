@@ -54,7 +54,7 @@ function DeployPage() {
 
   const deploy = async () => {
     if (!adapter) {
-      setError("Connect 1AM first.");
+      setError("Please connect your 1AM wallet first.");
       return;
     }
     setError("");
