@@ -33,13 +33,19 @@ export async function deployPreprodContract(
     zkConfigBaseUrl: zkUrl
   });
 
-  const baseZkConfigProvider = new FetchZkConfigProvider(zkUrl, window.fetch.bind(window));
-  const zkConfigProvider = {
-    ...baseZkConfigProvider,
-    getVerifierKey: (circuitId: string) => baseZkConfigProvider.getVerifierKey(circuitId.split('#').pop() as string),
-    getProverKey: (circuitId: string) => baseZkConfigProvider.getProverKey(circuitId.split('#').pop() as string),
-    getZKIR: (circuitId: string) => baseZkConfigProvider.getZKIR(circuitId.split('#').pop() as string),
-  };
+  class MyZkConfigProvider extends FetchZkConfigProvider<string> {
+    getVerifierKey(circuitId: string) {
+      return super.getVerifierKey(circuitId.split('#').pop() as string);
+    }
+    getProverKey(circuitId: string) {
+      return super.getProverKey(circuitId.split('#').pop() as string);
+    }
+    getZKIR(circuitId: string) {
+      return super.getZKIR(circuitId.split('#').pop() as string);
+    }
+  }
+
+  const zkConfigProvider = new MyZkConfigProvider(zkUrl, window.fetch.bind(window));
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
