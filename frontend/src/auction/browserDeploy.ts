@@ -3,6 +3,7 @@ import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import { CompiledContract } from "@midnight-ntwrk/compact-js";
 import { sampleSigningKey } from "@midnight-ntwrk/compact-runtime";
 import { createUnprovenDeployTx, submitTxAsync } from "@midnight-ntwrk/midnight-js-contracts";
+import { FetchZkConfigProvider } from "@midnight-ntwrk/midnight-js-fetch-zk-config-provider";
 import { Contract } from "../generated/sealed-bid-auction/contract/index.js";
 
 const DEFAULT_CONTRACT_NAME = "SealedBidAuction";
@@ -31,8 +32,6 @@ export async function deployPreprodContract(
     contractName,
     zkConfigBaseUrl: zkUrl
   });
-
-
 
   class BrowserZkConfigProvider extends FetchZkConfigProvider<string> {
     private normalizeCircuitId(circuitId: string) {
