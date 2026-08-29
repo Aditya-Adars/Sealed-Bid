@@ -22,3 +22,5 @@ export default defineConfig({
   },
   server: { port: 5173 }
 });
+
+// Vite configuration for the Midnight dApp frontend
