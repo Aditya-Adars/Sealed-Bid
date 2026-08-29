@@ -75,7 +75,7 @@ function DeployPage() {
       <section className="hero card">
         <div>
           <p className="eyebrow">Preprod deploy</p>
-          <h1>Deploy from the browser.</h1>
+          <h1>Deploy Contract via Browser</h1>
           <p className="lede">
             Connect 1AM on Midnight preprod, deploy directly from the wallet extension, and show the
             deployed contract address immediately.
