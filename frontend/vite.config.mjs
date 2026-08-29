@@ -18,10 +18,11 @@ export default defineConfig({
   plugins: [react(), wasm(), nodePolyfills()],
   optimizeDeps: {
     force: true,
-    exclude: ["@midnight-ntwrk/ledger-v8", "@midnight-ntwrk/onchain-runtime-v3"],
     include: [
       "@midnight-ntwrk/compact-js",
       "@midnight-ntwrk/compact-runtime",
+      "@midnight-ntwrk/ledger-v8",
+      "@midnight-ntwrk/onchain-runtime-v3",
       "@midnight-ntwrk/midnight-js-contracts",
       "@midnight-ntwrk/midnight-js-fetch-zk-config-provider",
       "@midnight-ntwrk/midnight-js-network-id",
