@@ -8,6 +8,7 @@ const AUCTIONEER = "auctioneer";
 const HISTORY_STORAGE_KEY = "midnight-auction-history";
 const PREPROD_CONTRACT_ID = import.meta.env.VITE_PREPROD_CONTRACT_ID ?? "";
 const formatShort = (hex: string) => (hex ? `${hex.slice(0, 10)}...` : "-");
+const formatAddress = (address?: string) => (address ? `${address.slice(0, 10)}...` : "-");
 
 type HistoryEntry = {
   id: string;
@@ -29,6 +30,7 @@ function DeployPage() {
   const [error, setError] = useState("");
   const [walletStatus, setWalletStatus] = useState("Disconnected");
   const [walletDetail, setWalletDetail] = useState("No preprod wallet connected");
+  const [walletAddress, setWalletAddress] = useState("");
   const [contractName, setContractName] = useState("SealedBidAuction");
   const [deployed, setDeployed] = useState<BrowserDeployResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -41,7 +43,8 @@ function DeployPage() {
       const active = await connectPreprod1AM();
       setAdapter(active);
       setWalletStatus("1AM connected");
-      setWalletDetail("Preprod network ready");
+      setWalletAddress(active.address ?? "");
+      setWalletDetail(active.address ? `Preprod network ready: ${active.address}` : "Preprod network ready");
       setStatus("Connected to 1AM on preprod.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -84,11 +87,18 @@ function DeployPage() {
         <div className="hero-grid">
           <Stat label="Network" value="preprod" />
           <Stat label="Wallet" value={walletStatus} />
+          <Stat label="Wallet addr" value={walletAddress ? formatShort(walletAddress) : "not connected"} />
           <Stat label="Status" value={status} />
           <Stat label="Contract" value={deployed ? formatShort(deployed.contractAddress) : "not deployed"} />
         </div>
         <div className="winner">
           <strong>Wallet state:</strong> {walletDetail}
+          {walletAddress ? (
+            <>
+              <br />
+              <span className="mono">Wallet address: {walletAddress}</span>
+            </>
+          ) : null}
           {deployed ? (
             <>
               <br />
@@ -174,6 +184,7 @@ function AuctionPage({
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [walletStatus, setWalletStatus] = useState("Disconnected");
   const [walletDetail, setWalletDetail] = useState("Disconnected from wallet");
+  const [walletAddress, setWalletAddress] = useState("");
   const [walletError, setWalletError] = useState("");
   const [item, setItem] = useState("Rare painting: Midnight over Nassau");
   const [bidder, setBidder] = useState("alice");
@@ -282,11 +293,15 @@ function AuctionPage({
       const active = await connect1AM(walletManager);
       setWallet(active);
       setWalletStatus(active.name ? `${active.name} connected` : "Wallet connected");
-      setWalletDetail(`Active wallet object captured: ${active.name ?? "unknown"}`);
+      setWalletAddress(active.address ?? "");
+      setWalletDetail(
+        `Active wallet object captured: ${active.name ?? "unknown"}${active.address ? ` (${active.address})` : ""}`
+      );
       setWalletError("");
       pushHistory(`wallet connected: ${active.name ?? "unknown"}`);
     } catch (cause) {
       setWallet(null);
+      setWalletAddress("");
       setWalletStatus("Connection failed");
       setWalletDetail("No active wallet captured");
       setWalletError(cause instanceof Error ? cause.message : String(cause));
@@ -298,6 +313,7 @@ function AuctionPage({
   const disconnectWallet = async () => {
     await walletManager?.disconnect?.();
     setWallet(null);
+    setWalletAddress("");
     setWalletStatus("Disconnected");
     setWalletDetail("Wallet disconnected");
     pushHistory("wallet disconnected");
@@ -340,6 +356,7 @@ function AuctionPage({
           <Stat label="Bid count" value={String(state.bidCount)} />
           <Stat label="Highest revealed bid" value={state.hasWinner ? String(state.highestBid) : "none"} />
           <Stat label="Wallet" value={walletStatus} />
+          <Stat label="Wallet addr" value={walletAddress ? formatShort(walletAddress) : "not connected"} />
           <Stat
             label="Preprod contract ID"
             value={PREPROD_CONTRACT_ID ? formatShort(PREPROD_CONTRACT_ID) : "not set"}
@@ -347,6 +364,12 @@ function AuctionPage({
         </div>
         <div className="winner">
           <strong>Wallet state:</strong> {walletDetail}
+          {walletAddress ? (
+            <>
+              <br />
+              <span className="mono">Wallet address: {walletAddress}</span>
+            </>
+          ) : null}
           {wallet ? (
             <>
               <br />

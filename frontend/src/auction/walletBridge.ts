@@ -1,5 +1,7 @@
 export type MidnightWalletLike = {
   name?: string;
+  address?: string;
+  getAddress?: () => Promise<string> | string;
   signData?: (data: string) => Promise<unknown>;
   submitTransaction?: (tx: string) => Promise<string>;
   balanceUnsealedTransaction?: (tx: string, options?: unknown) => Promise<{ tx: string }>;
@@ -25,6 +27,14 @@ export async function connect1AM(manager: WalletManagerLike): Promise<MidnightWa
   if (!active) {
     throw new Error("1AM wallet connection did not return an active wallet");
   }
+  const address =
+    active.address ??
+    (typeof active.getAddress === "function" ? await active.getAddress() : "") ??
+    "";
+  if (!address) {
+    throw new Error("1AM wallet returned no address");
+  }
+  active.address = address;
   return active;
 }
 
