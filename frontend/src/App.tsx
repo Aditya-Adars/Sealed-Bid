@@ -139,7 +139,7 @@ function DeployPage() {
           <p className="muted">No contract deployed yet.</p>
         )}
 
-        {error ? <div className="message error">Error: {error}</div> : null}
+        {error ? <div className="message error">Error Encountered: {error}</div> : null}
       </section>
     </main>
   );
@@ -590,7 +590,7 @@ function AuctionPage({
       </section>
 
       <footer className="footer">
-        {error ? <div className="message error">Error: {error}</div> : null}
+        {error ? <div className="message error">Error Encountered: {error}</div> : null}
         {!error && status ? <div className="message success">Success: {status}</div> : null}
         <p>
           This UI uses a local simulator with the same state machine as the Compact contract in{" "}
