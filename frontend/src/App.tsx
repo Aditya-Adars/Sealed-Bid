@@ -324,18 +324,24 @@ function AuctionPage({
     fallback: () => Promise<void>,
     success: string
   ) => {
-    if (wallet) {
-      const tx = await submitWalletAction(wallet, action, payload);
-      setStatus(`${success} Wallet tx submitted: ${formatShort(tx)}`);
-      pushHistory(`wallet tx submitted: ${action} ${formatShort(tx)}`);
+    try {
+      if (wallet) {
+        const tx = await submitWalletAction(wallet, action, payload);
+        setStatus(`${success} Wallet tx submitted: ${formatShort(tx)}`);
+        pushHistory(`wallet tx submitted: ${action} ${formatShort(tx)}`);
+        await fallback();
+        refresh();
+        return;
+      }
       await fallback();
+      setStatus(`${success} Local mode update applied.`);
+      pushHistory(`local action executed: ${action}`);
       refresh();
-      return;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setStatus(`Action failed: ${msg}`);
+      pushHistory(`action failed: ${action} - ${msg}`);
     }
-    await fallback();
-    setStatus(`${success} Local mode only. Connect 1AM and approve the transaction to use the wallet bridge.`);
-    pushHistory(`local fallback used: ${action}`);
-    refresh();
   };
 
   return (
