@@ -17,7 +17,7 @@ Use this section to keep the submission evidence in one place:
 - Live demo: [https://sealed-bid-auction-mu.vercel.app](https://sealed-bid-auction-mu.vercel.app)
 - Test output screenshot: 
   ![Test Output Screenshot](./test-output.png)
-- Demo video: insert your 1-minute walkthrough demo link here
+- Demo video: https://drive.google.com/file/d/16V8s7ruMhD3wNbDS2l4AJlNZyMkq9NJC/view?usp=sharing
 - CI evidence: confirm the workflow file at [.github/workflows/ci.yml](.github/workflows/ci.yml)
 - Contract evidence: confirm the sealed-bid logic and tests under [contract/](contract)
 - Frontend evidence: confirm the auction UI under [frontend/](frontend)
