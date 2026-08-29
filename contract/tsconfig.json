@@ -19,3 +19,5 @@
     "skipLibCheck": true
   }
 }
+
+// Enforces strict type checking for the Midnight contract
