@@ -6,7 +6,7 @@ import { connect1AM, submitWalletAction, type MidnightWalletLike, type WalletMan
 
 const AUCTIONEER = "auctioneer";
 const HISTORY_STORAGE_KEY = "midnight-auction-history";
-const PREPROD_CONTRACT_ID = import.meta.env.VITE_PREPROD_CONTRACT_ID ?? "";
+const PREPROD_CONTRACT_ID = import.meta.env.VITE_PREPROD_CONTRACT_ID ?? "0x3bc0098db8a15ad0e42406edd99ac45418c33cf88b4428e720ede6ee3fc2dc1d";
 const formatShort = (hex: string) => (hex ? `${hex.slice(0, 10)}...` : "-");
 
 type HistoryEntry = {
