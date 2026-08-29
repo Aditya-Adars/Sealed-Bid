@@ -3,7 +3,7 @@ import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import { CompiledContract } from "@midnight-ntwrk/compact-js";
 import { sampleSigningKey } from "@midnight-ntwrk/compact-runtime";
 import { createUnprovenDeployTx, submitTxAsync } from "@midnight-ntwrk/midnight-js-contracts";
-import { FetchZkConfigProvider } from "@midnight-ntwrk/midnight-js-fetch-zk-config-provider";
+import { ZKConfigProvider, createZKIR, createProverKey, createVerifierKey } from "@midnight-ntwrk/midnight-js-types";
 import { Contract } from "../generated/sealed-bid-auction/contract/index.js";
 
 const DEFAULT_CONTRACT_NAME = "SealedBidAuction";
@@ -12,6 +12,37 @@ const ZK_ASSET_PATH = "/zk/sealed-bid-auction/";
 export type BrowserDeployResult = {
   contractAddress: string;
 };
+
+class CustomZkConfigProvider extends ZKConfigProvider<string> {
+  constructor(private baseUrl: string) {
+    super();
+  }
+
+  private cleanId(circuitId: string): string {
+    return circuitId.includes("#") ? circuitId.split("#").pop()! : circuitId;
+  }
+
+  async getZKIR(circuitId: string) {
+    const name = this.cleanId(circuitId);
+    const res = await fetch(`${this.baseUrl}zkir/${name}.zkir`);
+    if (!res.ok) throw new Error(`Failed to fetch ZKIR for ${name}: ${res.statusText}`);
+    return createZKIR(new Uint8Array(await res.arrayBuffer()));
+  }
+
+  async getProverKey(circuitId: string) {
+    const name = this.cleanId(circuitId);
+    const res = await fetch(`${this.baseUrl}keys/${name}.prover`);
+    if (!res.ok) throw new Error(`Failed to fetch prover key for ${name}: ${res.statusText}`);
+    return createProverKey(new Uint8Array(await res.arrayBuffer()));
+  }
+
+  async getVerifierKey(circuitId: string) {
+    const name = this.cleanId(circuitId);
+    const res = await fetch(`${this.baseUrl}keys/${name}.verifier`);
+    if (!res.ok) throw new Error(`Failed to fetch verifier key for ${name}: ${res.statusText}`);
+    return createVerifierKey(new Uint8Array(await res.arrayBuffer()));
+  }
+}
 
 export async function connectPreprod1AM(): Promise<OneAMWalletAdapter> {
   setNetworkId("preprod");
@@ -31,7 +62,8 @@ export async function deployPreprodContract(
     contractName,
     zkConfigBaseUrl: zkUrl
   });
-  const zkConfigProvider = new FetchZkConfigProvider(zkUrl, window.fetch.bind(window));
+
+  const zkConfigProvider = new CustomZkConfigProvider(zkUrl);
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
