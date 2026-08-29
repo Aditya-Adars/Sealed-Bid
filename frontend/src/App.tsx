@@ -62,7 +62,7 @@ function DeployPage() {
     try {
       const result = await deployPreprodContract(adapter, contractName.trim() || "SealedBidAuction");
       setDeployed(result);
-      setStatus("Contract deployed through 1AM preprod.");
+      setStatus("Contract successfully deployed on 1AM preprod.");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
