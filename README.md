@@ -198,3 +198,7 @@ The GitHub Actions workflow runs on push and pull request:
 ## Notes
 
 The frontend currently uses a local simulator so the auction can be explored without setup. The contract and tests are structured so the UI can later be pointed at a live Midnight-backed client with the same interface.
+
+## Browser Compatibility
+
+Currently, this dApp is optimized for Chromium-based browsers with the Midnight 1AM extension installed.
