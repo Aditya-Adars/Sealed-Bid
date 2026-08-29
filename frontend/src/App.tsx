@@ -173,7 +173,7 @@ function AuctionPage({
   const [error, setError] = useState("");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [walletStatus, setWalletStatus] = useState("Disconnected");
-  const [walletDetail, setWalletDetail] = useState("No wallet connected");
+  const [walletDetail, setWalletDetail] = useState("Disconnected from wallet");
   const [walletError, setWalletError] = useState("");
   const [item, setItem] = useState("Rare painting: Midnight over Nassau");
   const [bidder, setBidder] = useState("alice");
