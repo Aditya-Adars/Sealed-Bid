@@ -3,6 +3,7 @@ import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import { CompiledContract } from "@midnight-ntwrk/compact-js";
 import { sampleSigningKey } from "@midnight-ntwrk/compact-runtime";
 import { createUnprovenDeployTx, submitTxAsync } from "@midnight-ntwrk/midnight-js-contracts";
+import { FetchZkConfigProvider } from "@midnight-ntwrk/midnight-js-fetch-zk-config-provider";
 import { Contract } from "../generated/sealed-bid-auction/contract/index.js";
 
 const DEFAULT_CONTRACT_NAME = "SealedBidAuction";
@@ -25,11 +26,20 @@ export async function deployPreprodContract(
 ): Promise<BrowserDeployResult> {
   setNetworkId("preprod");
   const ZK_ASSET_PATH = "/zk/sealed-bid-auction/";
+  const zkUrl = new URL(ZK_ASSET_PATH, window.location.origin).toString();
 
   const providers = await buildOneAMProviders(adapter, {
     contractName,
-    zkConfigBaseUrl: new URL(ZK_ASSET_PATH, window.location.origin).toString()
+    zkConfigBaseUrl: zkUrl
   });
+
+  const baseZkConfigProvider = new FetchZkConfigProvider(zkUrl, window.fetch.bind(window));
+  const zkConfigProvider = {
+    ...baseZkConfigProvider,
+    getVerifierKey: (circuitId: string) => baseZkConfigProvider.getVerifierKey(circuitId.split('#').pop() as string),
+    getProverKey: (circuitId: string) => baseZkConfigProvider.getProverKey(circuitId.split('#').pop() as string),
+    getZKIR: (circuitId: string) => baseZkConfigProvider.getZKIR(circuitId.split('#').pop() as string),
+  };
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
@@ -54,7 +64,7 @@ export async function deployPreprodContract(
   const privateStateId = `${DEFAULT_CONTRACT_NAME}PrivateState`;
 
   const deployTxData = await (createUnprovenDeployTx as any)(
-    { zkConfigProvider: providers.zkConfigProvider, walletProvider: providers.walletProvider },
+    { zkConfigProvider, walletProvider: providers.walletProvider },
     {
       compiledContract,
       args: [itemDescription],
