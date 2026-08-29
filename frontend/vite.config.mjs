@@ -2,18 +2,23 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import wasm from "vite-plugin-wasm";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@midnight-ntwrk/ledger-v8": resolve("node_modules/@midnight-ntwrk/ledger-v8/midnight_ledger_wasm.js")
+      "@midnight-ntwrk/ledger-v8": fileURLToPath(
+        new URL("./node_modules/@midnight-ntwrk/ledger-v8/midnight_ledger_wasm.js", import.meta.url)
+      ),
+      "@midnight-ntwrk/onchain-runtime-v3": fileURLToPath(
+        new URL("./node_modules/@midnight-ntwrk/onchain-runtime-v3/midnight_onchain_runtime_wasm.js", import.meta.url)
+      )
     }
   },
   plugins: [react(), wasm(), nodePolyfills()],
   optimizeDeps: {
     force: true,
-    exclude: ["@midnight-ntwrk/ledger-v8"],
+    exclude: ["@midnight-ntwrk/ledger-v8", "@midnight-ntwrk/onchain-runtime-v3"],
     include: [
       "@midnight-ntwrk/compact-js",
       "@midnight-ntwrk/compact-runtime",
