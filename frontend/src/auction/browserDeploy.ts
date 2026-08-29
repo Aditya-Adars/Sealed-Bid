@@ -33,19 +33,20 @@ export async function deployPreprodContract(
     zkConfigBaseUrl: zkUrl
   });
 
-  class MyZkConfigProvider extends FetchZkConfigProvider<string> {
-    getVerifierKey(circuitId: string) {
-      return super.getVerifierKey(circuitId.split('#').pop() as string);
-    }
-    getProverKey(circuitId: string) {
-      return super.getProverKey(circuitId.split('#').pop() as string);
-    }
-    getZKIR(circuitId: string) {
-      return super.getZKIR(circuitId.split('#').pop() as string);
-    }
-  }
-
-  const zkConfigProvider = new MyZkConfigProvider(zkUrl, window.fetch.bind(window));
+  const baseZkConfigProvider = new FetchZkConfigProvider(zkUrl, window.fetch.bind(window));
+  
+  const zkConfigProvider = {
+    getVerifierKey: (circuitId: string) => baseZkConfigProvider.getVerifierKey(circuitId.split('#').pop() as string),
+    getProverKey: (circuitId: string) => baseZkConfigProvider.getProverKey(circuitId.split('#').pop() as string),
+    getZKIR: (circuitId: string) => baseZkConfigProvider.getZKIR(circuitId.split('#').pop() as string),
+    getVerifierKeys: async (circuitIds: string[]) => Promise.all(circuitIds.map(async id => [id, await baseZkConfigProvider.getVerifierKey(id.split('#').pop() as string)] as [string, any])),
+    getProverKeys: async (circuitIds: string[]) => Promise.all(circuitIds.map(async id => [id, await baseZkConfigProvider.getProverKey(id.split('#').pop() as string)] as [string, any])),
+    getZKIRs: async (circuitIds: string[]) => Promise.all(circuitIds.map(async id => [id, await baseZkConfigProvider.getZKIR(id.split('#').pop() as string)] as [string, any]))
+  } as any;
+  
+  console.log("zkConfigProvider:", zkConfigProvider);
+  console.log("has getZKIR?", typeof zkConfigProvider.getZKIR === 'function');
+  console.log("has getVerifierKeys?", typeof (zkConfigProvider as any).getVerifierKeys === 'function');
 
   // Create an initial private state for the auctioneer deployer
   const initialPrivateState = {
